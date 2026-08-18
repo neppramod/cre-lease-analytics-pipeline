@@ -12,8 +12,9 @@ import java.util.List;
 
 @Service
 public class PDFDocumentReader {
-    public List<Document> getDocsFromPdf() {
-        Resource resource = new ClassPathResource("sampledocumentsfolder/sample1.pdf");
+    public List<Document> getDocsFromPdf(String fullPath) {
+        Resource resource = new ClassPathResource(fullPath);
+
         PagePdfDocumentReader pdfReader = new PagePdfDocumentReader(
                 resource,
                 PdfDocumentReaderConfig.builder()
