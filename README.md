@@ -71,7 +71,7 @@ java -jar target/pdfreaderex-0.0.1-SNAPSHOT.jar
 - DeterministicLeaseParserTest: 
   - This is the main test class for the DeterministicLeaseParser. It reads in a sample PDF file and verifies the extracted fields
 
-# Kafka
+# Kafka (LeaseStreamingSimulationTest)
 - I assumed we have the PDFs from some source. However, once we extract the necessary fields. I wanted to simulate the message is ready for further processing (can be used by various consumers)
 - I use a simulated Kafka queue (as part of testing) that starts a lightweight Kafka broker, and verifies the message transfer through Kafka Producer/Consumer workflow
 - The extracted object data is serialized into JSON, passed through Kafka queue, consumed by a consumer and deserialized back to LeaseData and verified the original data
