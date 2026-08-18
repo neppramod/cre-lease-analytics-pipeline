@@ -34,15 +34,15 @@ Property Operations / Compliance: Requires strict tracking of critical dates (e.
 mvnw.cmd spring-boot:run
 ```
 
-- Run runtests.sh bash command (from inside src/main/resources/scripts/ directory) (to call the API for extracting relevant information from the PDF documents)
+- Using another terminal execute `runtests.sh` bash command (from inside src/main/resources/scripts/ directory) (to call the API for extracting relevant information from the PDF documents)
 
 ```shell
-src/main/resources/scripts/runtest.sh                   
+./src/main/resources/scripts/runtests.sh                
 ```
 
 # Execution Step V2
 
-Run jar directly.
+You can also run the jar directly.
 
 ```shell
 # 1. Package the codebase (skipping test sweeps for immediate launch)
@@ -154,4 +154,4 @@ AI was part of the design and development from the start.
 
 - Would definitely use LLM tool to extract the correct fields after parsing, as the documents can have the given fields described in different contexts. A LLM tool can certainly do better than a parser on this
 
-- I only show cased the ingress / egress pipeline, but depending on the use case I could create servies on both end of the spectrum (probably a web UI a user could use to upload multiple documents) and use a proper
+- By focusing heavily on the ingress/egress contract boundaries via Kafka, we've built a system where the parsing core can be swapped or upgraded with zero breaking changes to downstream consumer architectures.
