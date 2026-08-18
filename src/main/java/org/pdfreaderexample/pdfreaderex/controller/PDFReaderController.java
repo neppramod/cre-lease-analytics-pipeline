@@ -32,19 +32,6 @@ public class PDFReaderController {
         this.leaseParser = leaseParser;
     }
 
-    /*
-    @GetMapping("/parse")
-    public LeaseData parse() {
-        // Read raw document pieces and parse the fields
-        List<Document> documents = reader.getDocsFromPdf();
-        LeaseData structuredData = leaseParser.extractFields(documents);
-
-        log.info("Document Text", structuredData);
-
-        return structuredData;
-    }
-     */
-
     @GetMapping("/parse")
     public LeaseData parse(@RequestParam(value = "file", defaultValue = "sample1") String fileName) {
         // 1. Pass the fileName argument down cleanly into your resource allocator logic
