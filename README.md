@@ -155,3 +155,35 @@ AI was part of the design and development from the start.
 - Would definitely use LLM tool to extract the correct fields after parsing, as the documents can have the given fields described in different contexts. A LLM tool can certainly do better than a parser on this
 
 - By focusing heavily on the ingress/egress contract boundaries via Kafka, we've built a system where the parsing core can be swapped or upgraded with zero breaking changes to downstream consumer architectures.
+
+# Production Ready Changes
+
+## Future Production Containerization Strategy (Docker)
+
+To transition this microservice from a local prototype into a globally scalable, cloud-native deployment topology, the next immediate phase is containerization.
+
+### 1. Multi-Stage Dockerfile Optimization
+Rather than packaging a heavy development environment, the production image will utilize a **multi-stage build** to optimize performance, minimize the attack surface, and keep the final image size under 150MB:
+
+```dockerfile
+# Stage 1: Build the optimized production artifact
+FROM eclipse-temurin:17-jdk-jammy AS builder
+WORKDIR /app
+COPY . .
+RUN ./mvnw clean package -DskipTests
+
+# Stage 2: Minimal distroless runtime execution container
+FROM eclipse-temurin:17-jre-jammy
+WORKDIR /app
+COPY --from=builder /app/target/pdfreaderex-*.jar app.jar
+EXPOSE 8080
+USER 1001
+ENTRYPOINT ["java", "-jar", "app.jar"]
+```
+
+### 2. Multi-Container Orchestration (Docker Compose)
+In an enterprise cloud profile, the in-memory Embedded KRaft broker would be pulled out. A `docker-compose.yml` manifest would orchestrate the distributed boundaries, linking the parsing microservice with an external resilient streaming cluster and a document staging database:
+
+* **`cre-parser-service`:** Runs our Spring Boot ingestion app.
+* **`kafka-broker`:** Dedicated KRaft-mode controller container image handling event-stream traffic.
+* **`postgre-vector-db`:** Relational database container equipped with `pgvector` to store parsed text fragments once the system scales to an AI/LLM parsing approach.
