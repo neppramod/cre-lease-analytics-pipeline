@@ -238,6 +238,7 @@ against the PDF.
 I changed the parser to collapse internal whitespace and added `RealLeasePdfParsingTest`, which reads the actual
 PDFs through `PDFDocumentReader` so the tests cover what the service returns. The suite went from 13 tests to 16.
 
+
 The Kafka episode was me correcting the agent. This was the reverse, and it's the one I'd point to: a passing
 test was hiding a defect in the output contract, and running the service surfaced in a minute what reading it
 hadn't.
@@ -272,6 +273,8 @@ Representative edits:
 
 The pattern: the agent defaulted to describing an ambitious system rather than the one in the repository.
 Reviewing the prose for overclaiming needed the same attention as reviewing the Kafka serializers.
+
+![Claud Code's suggestion edits](images/claude_code_correction.png){width=40%}
 
 ### How I worked
 
