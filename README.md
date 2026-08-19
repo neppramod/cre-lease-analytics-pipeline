@@ -19,36 +19,46 @@ Property Operations / Compliance: Requires strict tracking of critical dates (e.
 - **Hypothesis:** Unstructured lease PDFs can be parsed and normalized into a structured JSON format using deterministic extraction logic.
 - **Key Entities:** Landlord, Tenant, Expiration Date, Lease Type (NNN/Gross), Escalation Clauses.
 
-# ⚙️ Prerequisites
+# Prerequisites & Environment Boundaries
 
-Before executing the initialization strings, ensure your local development machine satisfies these runtime environmental boundaries:
+Before executing the initialization strings, ensure your runtime host satisfies these parameters:
+* **Java Development Kit:** JDK `17` or higher (Fully backward-compatible up to JDK 26).
+* **Execution Environment:** Bash / Zsh shell wrapper capabilities (For automation loop execution).
+* **Port Availability:** Dynamic open-port allocation (The embedded cluster utilizes randomized ephemeral ports to eliminate local network conflicts).
 
-* **Java Development Kit (JDK):** Version `17` or higher (Fully backward-compatible up to JDK 26)
-* **Build Tooling:** Apache Maven 3.x (The project includes the `./mvnw` wrapper for automated installation)
-* **Shell Environment:** Bash/Zsh (For executing the automated `./runtests.sh` validation loop)
+---
 
-# Detailed Execution Steps
+# System Execution & Testing Matrix
 
-## Run the Spring Boot application
-On macOS / Linux (From project root directory, execute following command):
+Follow these sequential steps to boot the microservice ecosystem, compile artifacts, and execute multi-document verification loops:
 
-```shell
-./mvnw spring-boot:run
+### 1. Compile and Execute Test Suites
+Run the full Maven lifecycle phase. This compiles your classes, instantiates the in-memory KRaft Kafka broker, and runs the entire decoupled test harness (Unit + Integration Streaming sweeps):
+```bash
+./mvnw clean test
 ```
 
-**If on Windows (Command Prompt):**
+### 2. Boot the Spring Boot Application Server
+Launch the embedded Tomcat server on port `8080`. This maps files from your dynamic path parameters specified in `application.properties`:
+```bash
+# On macOS / Linux:
+./mvnw spring-boot:run
 
-```shell
+# On Windows (Command Prompt):
 mvnw.cmd spring-boot:run
 ```
 
-## Use a test script to test parsing of the documents
-Using another terminal execute `runtests.sh` bash command (from inside src/main/resources/scripts/ directory) (to call the API for extracting relevant information from the PDF documents). We use curl to parse all 3 documents (**sample1.pdf, sample2.pdf, sample3.pdf**) located in **resources/sampledocumentsfolder** directory)
+### 3. Run Automated Multi-Document Parsing Loops
+Open a separate terminal window, navigate to your script directory, and execute your bash automation loop. This dynamically crawls and extracts all three synthetic lease variants (`sample1`, `sample2`, `sample3`):
+```bash
+# Navigate to the automated test script folder
+cd src/main/resources/scripts/
 
-> Note: Make sure the main project is running, so that we can make the API calls (curl) with above script properly.
+# Grant executable permission permissions
+chmod +x runtests.sh
 
-```shell
-./src/main/resources/scripts/runtests.sh                
+# Fire the multi-file test sweep loop against the live REST server
+./runtests.sh
 ```
 
 ![Run Tests](images/run_tests_curl.png){width=40%}
@@ -75,7 +85,7 @@ Using another terminal execute `runtests.sh` bash command (from inside src/main/
 - DeterministicLeaseParserTest: 
   - This is the main test class for the DeterministicLeaseParser. It reads in a sample PDF file and verifies the extracted fields
 
-# Kafka (LeaseStreamingSimulationTest)
+# Kafka Expansion (LeaseStreamingSimulationTest)
 
 - I assumed we have the PDFs from some source. However, once we extract the necessary fields. I wanted to simulate the message is ready for further processing (can be used by various consumers)
 - I use a simulated Kafka queue (as part of testing) that starts a lightweight Kafka broker, and verifies the message transfer through Kafka Producer/Consumer workflow
@@ -88,6 +98,8 @@ To run the test, you can use following command
 ```
 
 ![Kafka Deserialization Log](images/deserialized_data_in_consumer_log.png){width=40%}
+
+---
 
 # Design Choices
 
@@ -108,6 +120,8 @@ Rather than expanding the domain scope horizontally (which would introduce an an
 
 **Future Horizon:**  
 For a longer-term production rollout, I would spend more time embedding deeper into adjacent CRE legal constructs (such as absolute gross leases, co-tenancy clauses, and sub-leasing rights). Because the current code architecture is built with isolated, modular parsing services, expanding the data model to accommodate these additional domain variations in the future can be done seamlessly without requiring a rewrite of the core streaming pipeline infrastructure."
+
+---
 
 # Usage of AI
 
