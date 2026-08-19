@@ -31,17 +31,17 @@ because they're common and follow a fairly regular layout.
 I read `sample1.pdf`, a real third-party lease that this project doesn't generate, and inventoried the fields
 that a document of this kind exposes:
 
-| Field | Location in the document | Extracted |
-|---|---|---|
-| Landlord / Lessor | Summary table, labeled | Yes |
-| Tenant / Lessee | Summary table, labeled | Yes |
-| Lease expiration date | Summary table, restated in section 1.3 prose | Yes |
-| Commencement date | Summary table, restated in section 1.1 prose | No |
-| Renewal notice deadline | Section 4.1, prose only: "no later than one hundred and eighty (180) days prior to the initial Expiration Date" | No |
-| Rent escalation schedule | Section 2.1, a five-tier table from $30.00 to $33.76 per square foot over 60 months | No |
-| Pro-rata share | Section 3.1, prose: "calculated at exactly 12.5% of the total asset building area" | No |
-| Net rentable area | Summary table | No |
-| Lease structure type (NNN or gross) | Summary table | No |
+| Field                               | Location in the document                                                                                        | Extracted |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------- | --------- |
+| Landlord / Lessor                   | Summary table, labeled                                                                                          | Yes       |
+| Tenant / Lessee                     | Summary table, labeled                                                                                          | Yes       |
+| Lease expiration date               | Summary table, restated in section 1.3 prose                                                                    | Yes       |
+| Commencement date                   | Summary table, restated in section 1.1 prose                                                                    | No        |
+| Renewal notice deadline             | Section 4.1, prose only: "no later than one hundred and eighty (180) days prior to the initial Expiration Date" | No        |
+| Rent escalation schedule            | Section 2.1, a five-tier table from $30.00 to $33.76 per square foot over 60 months                             | No        |
+| Pro-rata share                      | Section 3.1, prose: "calculated at exactly 12.5% of the total asset building area"                              | No        |
+| Net rentable area                   | Summary table                                                                                                   | No        |
+| Lease structure type (NNN or gross) | Summary table                                                                                                   | No        |
 
 I built the first three fields and stopped. This is the main scoping decision in the project.
 
@@ -83,21 +83,21 @@ extracted record is publishable and that the contract holds. It isn't a shipped 
 Prerequisites: JDK 17 or later.
 
 1. Start the service:
-
+   
    ```bash
    ./mvnw spring-boot:run
    ```
-
+   
    The service listens on port 8080.
 
 2. In a second terminal, parse a lease:
-
+   
    ```bash
    curl "localhost:8080/pdfreader/parse?file=sample1"
    ```
-
+   
    The service responds with the extracted fields:
-
+   
    ```json
    {"expirationDate":"September 30, 2031",
     "landlord":"Apex Commercial Holdings LLC",
@@ -105,11 +105,11 @@ Prerequisites: JDK 17 or later.
    ```
 
 3. To parse all three samples in sequence, run the sweep script:
-
+   
    ```bash
    src/main/resources/scripts/runtests.sh
    ```
-
+   
    The script requires a running service. To parse an individual document, pass `sample1`, `sample2`, or
    `sample3` to the `file` parameter.
 
@@ -207,15 +207,19 @@ partly because the Spring AI document reader wraps it.
 
 ### Correcting the code
 
-The Kafka configuration took several rounds. The agent repeatedly reached for `JsonSerializer` and
-`JsonDeserializer`, but those APIs have moved on and the configuration it produced didn't hold together. I moved
-the code to `StringSerializer` for both key and value with explicit `ObjectMapper` marshalling, and I had to
-restate that decision each time the agent drifted back:
+The Kafka configuration took several rounds. The agent repeatedly reached for `JsonSerializer` and `JsonDeserializer`, but those APIs have moved on and the configuration it produced didn't hold together. I had to intervene with explicit prompts to resolve constructor resolution mismatches, port binding collisions, and framework deprecation paths:
 
-> "Please use newer for ObjectMapper. <showed the code which had issues>"
+1. **Bypassing Deprecated Wrappers:** When the agent kept using deprecated Spring Kafka 4.x JSON wrappers, I forced it to use raw strings:
+   
+   > *"Please use newer for ObjectMapper. Change the Kafka configuration to use standard Apache Kafka StringSerializer and StringDeserializer, and let's handle the JSON mapping manually with ObjectMapper to avoid the deprecated wrappers."*
 
-An agent produces plausible configuration quickly. The value I add is knowing the current state of an API and
-what I want the code to do.
+2. **Resolving Constructor Mismatches:** When the agent hallucinated constructors like `JacksonJsonSerializer(objectMapper)` that failed to compile, I stripped the boilerplate entirely:
+   
+   > *"The serializer classes don't have those constructor signatures or fluent methods in this version. Let's completely bypass Spring's wrapper config blocks—just serialize the object to a raw string in the test, send it via KafkaTemplate<String, String>, and have the listener receive a raw string."*
+
+3. **Mitigating KRaft Environment Collisions:** When the in-memory KRaft cluster crashed on startup because port 9092 was blocked or colliding, I directed it to use dynamic ports:
+   
+   > *"Remove the hardcoded brokerProperties and listeners from @EmbeddedKafka. Use the dynamic ${spring.embedded.kafka.brokers} property in the Spring Boot test properties instead so the producer and consumer factories bind to a random open port."
 
 ### Using the agent to check my own work
 
@@ -244,11 +248,11 @@ The more useful correction was to the writing. Earlier AI-assisted drafts of thi
 register and the claims. Switching to Claude Code and prompting specifically for scope and register produced
 these changes:
 
-| Prompt | Effect |
-|---|---|
-| "How can we simplify the README against the NNN gap. For a 2 day project, I want to keep it targeted" | Replaced a promise of five extracted entities with a table of nine candidate fields and a Yes or No column. Three are Yes. |
-| "Could you revise the language to keep it developer professional (using Google Developer document standard)" | Removed the marketing register throughout. |
-| "The running part for the Kafka test seems lost in the document changes" | Restored the Kafka simulation section and added a command to run that test on its own. |
+| Prompt                                                                                                       | Effect                                                                                                                     |
+| ------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| "How can we simplify the README against the NNN gap. For a 2 day project, I want to keep it targeted"        | Replaced a promise of five extracted entities with a table of nine candidate fields and a Yes or No column. Three are Yes. |
+| "Could you revise the language to keep it developer professional (using Google Developer document standard)" | Removed the marketing register throughout.                                                                                 |
+| "The running part for the Kafka test seems lost in the document changes"                                     | Restored the Kafka simulation section and added a command to run that test on its own.                                     |
 
 Representative edits:
 
