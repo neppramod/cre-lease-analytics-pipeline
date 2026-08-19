@@ -19,39 +19,36 @@ Property Operations / Compliance: Requires strict tracking of critical dates (e.
 - **Hypothesis:** Unstructured lease PDFs can be parsed and normalized into a structured JSON format using deterministic extraction logic.
 - **Key Entities:** Landlord, Tenant, Expiration Date, Lease Type (NNN/Gross), Escalation Clauses.
 
-# Execution Steps V1
+# ⚙️ Prerequisites
 
-- Run the Spring Boot application
+Before executing the initialization strings, ensure your local development machine satisfies these runtime environmental boundaries:
+
+* **Java Development Kit (JDK):** Version `17` or higher (Fully backward-compatible up to JDK 26)
+* **Build Tooling:** Apache Maven 3.x (The project includes the `./mvnw` wrapper for automated installation)
+* **Shell Environment:** Bash/Zsh (For executing the automated `./runtests.sh` validation loop)
+
+# Detailed Execution Steps
+
+## Run the Spring Boot application
+On macOS / Linux (From project root directory, execute following command):
 
 ```shell
-# On macOS / Linux (From project root directory, execute following command):
 ./mvnw spring-boot:run
 ```
 
-## On Windows (Command Prompt):
+**If on Windows (Command Prompt):**
 
 ```shell
 mvnw.cmd spring-boot:run
 ```
 
-- Using another terminal execute `runtests.sh` bash command (from inside src/main/resources/scripts/ directory) (to call the API for extracting relevant information from the PDF documents). We use curl to parse all 3 documents (sample1.pdf, sample2.pdf, sample3.pdf located in resources/sampledocumentsfolder directory)
+## Use a test script to test parsing of the documents
+Using another terminal execute `runtests.sh` bash command (from inside src/main/resources/scripts/ directory) (to call the API for extracting relevant information from the PDF documents). We use curl to parse all 3 documents (**sample1.pdf, sample2.pdf, sample3.pdf**) located in **resources/sampledocumentsfolder** directory)
 
 > Note: Make sure the main project is running, so that we can make the API calls (curl) with above script properly.
 
 ```shell
 ./src/main/resources/scripts/runtests.sh                
-```
-
-# Execution Step V2
-
-You can also run the jar directly.
-
-```shell
-# 1. Package the codebase (skipping test sweeps for immediate launch)
-./mvnw clean package -DskipTests
-
-# 2. Run the production artifact directly via the JVM runtime
-java -jar target/pdfreaderex-0.0.1-SNAPSHOT.jar
 ```
 
 ![Run Tests](images/run_tests_curl.png){width=40%}
@@ -87,7 +84,7 @@ java -jar target/pdfreaderex-0.0.1-SNAPSHOT.jar
 To run the test, you can use following command
 
 ```shell
-$ ./mvnw clean test
+./mvnw clean test
 ```
 
 ![Kafka Deserialization Log](images/deserialized_data_in_consumer_log.png){width=40%}
