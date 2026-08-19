@@ -28,13 +28,15 @@ Property Operations / Compliance: Requires strict tracking of critical dates (e.
 ./mvnw spring-boot:run
 ```
 
-# On Windows (Command Prompt):
+## On Windows (Command Prompt):
 
 ```shell
 mvnw.cmd spring-boot:run
 ```
 
-- Using another terminal execute `runtests.sh` bash command (from inside src/main/resources/scripts/ directory) (to call the API for extracting relevant information from the PDF documents)
+- Using another terminal execute `runtests.sh` bash command (from inside src/main/resources/scripts/ directory) (to call the API for extracting relevant information from the PDF documents). We use curl to parse all 3 documents (sample1.pdf, sample2.pdf, sample3.pdf located in resources/sampledocumentsfolder directory)
+
+> Note: Make sure the main project is running, so that we can make the API calls (curl) with above script properly.
 
 ```shell
 ./src/main/resources/scripts/runtests.sh                
@@ -80,7 +82,7 @@ java -jar target/pdfreaderex-0.0.1-SNAPSHOT.jar
 
 - I assumed we have the PDFs from some source. However, once we extract the necessary fields. I wanted to simulate the message is ready for further processing (can be used by various consumers)
 - I use a simulated Kafka queue (as part of testing) that starts a lightweight Kafka broker, and verifies the message transfer through Kafka Producer/Consumer workflow
-- The extracted object data is serialized into JSON, passed through Kafka queue, consumed by a consumer and deserialized back to LeaseData and verified the original data
+- The extracted object data is serialized into JSON, passed through Kafka queue, consumed by a consumer and deserialized back to LeaseData to verify the original data
 
 To run the test, you can use following command
 
