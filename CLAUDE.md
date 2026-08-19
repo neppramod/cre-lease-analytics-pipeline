@@ -35,9 +35,9 @@ Request flow: `PDFReaderController` (`GET /pdfreader/parse?file=<name>`) → `PD
 
 ## Notable dependency details
 
-Spring Boot parent is **4.1.0**, which uses the newer starter artifact names — `spring-boot-starter-webmvc`, `spring-boot-starter-webmvc-test`, `spring-boot-starter-data-jpa-test`, `spring-boot-h2console`. Do not substitute the Boot 3.x names (`spring-boot-starter-web`, `spring-boot-starter-test`). Spring AI is pinned via BOM at `2.0.0`.
+Spring Boot parent is **4.1.0**, which uses the newer starter artifact names — `spring-boot-starter-webmvc`, `spring-boot-starter-webmvc-test`. Do not substitute the Boot 3.x names (`spring-boot-starter-web`, `spring-boot-starter-test`). Spring AI is pinned via BOM at `2.0.0`.
 
-JPA + H2 are on the classpath but unused — no entities, repositories, or datasource config exist yet.
+There is no persistence layer. JPA and H2 were removed from `pom.xml` on 2026-08-19; parsed results are serialized straight to the HTTP response and never stored.
 
 ## Verified behavior and known gaps
 
