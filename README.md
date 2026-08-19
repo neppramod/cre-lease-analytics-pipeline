@@ -151,7 +151,7 @@ The consumer logs each record it deserializes:
 to a model and request the fields. For messy production paper, that's probably the better approach, and it's the
 first engine change in [What to build next](#what-to-build-next). I chose regular expressions here because they
 are testable, they add no per-document cost or latency, and they return the same answer every time. The tradeoff
-buys correctness on documents whose labels I've seen, and it fails on documents I haven't.
+buys correctness on documents whose labels I've seen, and it gracefully degrades to null on documents I haven't.
 
 **Classpath input instead of an ingestion path.** Documents resolve through `ClassPathResource` from
 `src/main/resources/sampledocumentsfolder/`. I assumed that PDFs arrive from an upstream process such as a
@@ -275,7 +275,7 @@ The biggest learning from this project was not necessarily the technological par
 simultaneously. Each agent had a different perspective on the codebase and I needed to integrate them into one 
 consistent view of the project. Also, if you can see the Representative edits (kept what Claude changed) section, 
 you may notice slightly how Claude undermines the scope of the project a little bit. 
-It was more apparant while working with the agent itself. While trying to correct the document, I felt it cornered itself 
-to become more restrictive and undermined what the project represented. The problem was not the edit itself, but the persona it kept after that. It would keep same persona throughout while moving on from document edit to reviewing and editing code as well. I kept the scope of the project where it is because of this aspect as well. I could have very well added few more components to the project (e.g. UI, persistence etc.). However, working and tuning the agent to where I want them to work as fellow Engineers would be the most important part. Once gaining that confidence by nudging it everywhere possible during the early phases of the prject would have greater gains when I start adding more features to the project.
+It was more apparent while working with the agent itself. While trying to correct the document, I felt it cornered itself 
+to become more restrictive and undermined what the project represented. The problem was not the edit itself, but the persona it kept after that. It would keep same persona throughout while moving on from document edit to reviewing and editing code as well. I kept the scope of the project where it is because of this aspect as well. I could have very well added few more components to the project (e.g. UI, persistence etc.). However, working and tuning the agent to where I want them to work as fellow Engineers would be the most important part. Once gaining that confidence by nudging it everywhere possible during the early phases of the project would have greater gains when I start adding more features to the project.
 
 Given the scope, I am very satisfied with the end result and the learnings I had about the domain and working with AI agents.
