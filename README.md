@@ -169,19 +169,19 @@ without touching the HTTP or Kafka boundary. I expect the parsing engine to chan
 - A missing or unreadable file returns HTTP 500 rather than HTTP 404.
 - The service doesn't persist anything. It returns each parsed record and discards it for local usage.
 
-## What to build next
-
+## What to build next  
+  
 1. **Extract and calculate the renewal notice deadline.** Parse the notice period from section 4.1, subtract it
    from the expiration date, and return the resulting date with the number of days remaining. This change turns
    the service from a field extractor into a tool that prevents a lost option, and it's the shortest path to
-   user value.
-2**Add a language-model parser behind the existing parser boundary**, then run it against the deterministic
+   user value.  
+2. **Add a language-model parser behind the existing parser boundary**, then run it against the deterministic
    parser on the same documents to compare accuracy and cost. Fields that appear only in prose, such as the
-   pro-rata share and the notice clause, are where a model should win clearly.
-3**Add real ingestion and an external broker.** Accept uploads or watch an object store, and move the Kafka
-   producer out of the tests and into the application behind configuration.
-4**Add persistence and containerization.** Store abstracted leases so that you can query a portfolio by
-   expiration window, and package the service as a multi-stage image that connects to an external broker.
+   pro-rata share and the notice clause, are where a model should win clearly.  
+3. **Add real ingestion and an external broker.** Accept uploads or watch an object store, and move the Kafka
+   producer out of the tests and into the application behind configuration.  
+4. **Add persistence and containerization.** Store abstracted leases so that you can query a portfolio by
+   expiration window, and package the service as a multi-stage image that connects to an external broker.  
 
 ## Use of AI
 
@@ -263,7 +263,7 @@ Representative edits:
 The pattern: the agent defaulted to describing an ambitious system rather than the one in the repository.
 Reviewing the prose for overclaiming needed the same attention as reviewing the Kafka serializers.
 
-![Claud Code's suggestion edits](images/claude_code_correction.png){width=40%}
+![Claud Code's suggestion edits](images/claude_code_correction.png)
 
 ### How I worked
 
