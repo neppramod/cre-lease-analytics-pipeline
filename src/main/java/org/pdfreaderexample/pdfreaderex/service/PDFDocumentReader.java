@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
+// Read Text from a PDF document and save it as List<Document>
+// The reader can merge or read the text separately
 public class PDFDocumentReader {
     public List<Document> getDocsFromPdf(String fullPath) {
         Resource resource = new ClassPathResource(fullPath);

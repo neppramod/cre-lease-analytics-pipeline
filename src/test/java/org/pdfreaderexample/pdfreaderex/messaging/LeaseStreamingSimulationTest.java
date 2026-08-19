@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import; // 🚀 REQUIRED IMPORT
+import org.springframework.context.annotation.Import;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
@@ -68,7 +68,7 @@ class LeaseStreamingSimulationTest {
 
         // KRaft broker takes a split second to perform partition balancing on startup,
         // the first message might fire before the consumer is fully listening
-        // to mitigate this issue, we add a retry loop
+        // to mitigate this issue, I added a retry loop
         // Here poll() method blocks the main thread and waits for up to 2 seconds
         // if it returns null, re-fires the message
         // Once the consumer establishes its partition handshake, it caches the message and
@@ -83,7 +83,7 @@ class LeaseStreamingSimulationTest {
         assertNotNull(inboundJson, "The message payload failed to clear the embedded broker queue within the allocation window.");
 
 
-        // Deserialize the JSON back to LeaseData and assert to ensure no data was changed or lost during transit
+        // Deserialize the JSON back to LeaseData and assert values to ensure no data was changed or lost during transit
         LeaseData inboundEvent = objectMapper.readValue(inboundJson, LeaseData.class);
         assertEquals("Apex Commercial Holdings LLC", inboundEvent.getLandlord());
         assertEquals("Nexus Software Solutions Inc.", inboundEvent.getTenant());
@@ -132,7 +132,7 @@ class LeaseStreamingSimulationTest {
             config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
             config.put(ConsumerConfig.GROUP_ID_CONFIG, "cre-test-group");
             config.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-            config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+            config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);  // serialize both key/value as string
             config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
             return new DefaultKafkaConsumerFactory<>(config);
         }

@@ -33,10 +33,10 @@ public class PDFReaderController {
 
     @GetMapping("/parse")
     public LeaseData parse(@RequestParam(value = "file", defaultValue = "sample1") String fileName) {
-        // 1. Pass the fileName argument down cleanly into your resource allocator logic
+        // Pass the fileName so that prper files can be read from filesystem
         List<Document> documents = reader.getDocsFromPdf(leaseFolder + "/" + fileName + ".pdf");
 
-        // 2. Process via the deterministic extraction engine
+        // Extract LeaseData from documents list
         return leaseParser.extractFields(documents);
     }
 }

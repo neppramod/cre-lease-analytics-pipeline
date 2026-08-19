@@ -9,10 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 // Parses the sample PDFs through the same reader the running service uses.
 //
-// DeterministicLeaseParserTest hands the parser a hand-written string, so it cannot catch anything PDFBox
-// introduces during extraction. That blind spot hid real padding in the JSON responses: the service returned
-// "Apex  Commercial    Holdings   LLC" while the unit test asserted the single-spaced form and passed.
-// These tests read the actual files, so they cover the contract a downstream consumer depends on.
+// Difference with DeterministicLeaseParserTest.  DeterministicLeaseParserTest uses a mocked string parsed as PDF instead of using sample PDFs
 class RealLeasePdfParsingTest {
 
     private final PDFDocumentReader reader = new PDFDocumentReader();

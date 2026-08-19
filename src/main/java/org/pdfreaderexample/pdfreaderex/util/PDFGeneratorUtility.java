@@ -9,6 +9,7 @@ import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import java.io.File;
 import java.io.IOException;
 
+// Use deterministic fields and add details as parameters to create custom PDFs
 public class PDFGeneratorUtility {
     public static void generateMockLease(String filePath, String landlord, String tenant, String expiration) throws IOException {
         try (PDDocument document = new PDDocument()) {

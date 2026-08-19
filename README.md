@@ -28,8 +28,7 @@ carry a different label, sit in a different section, or appear only inside a sen
 a table. I focused on NNN leases, where the tenant pays taxes, insurance, and maintenance on top of the rent,
 because they're common and follow a fairly regular layout.
 
-I read `sample1.pdf`, a real third-party lease that this project doesn't generate, and inventoried the fields
-that a document of this kind exposes:
+I read `sample1.pdf`, a representative third-party lease that shows following fields that a document of this kind would typically contain:
 
 | Field                               | Location in the document                                                                                        | Extracted |
 | ----------------------------------- | --------------------------------------------------------------------------------------------------------------- | --------- |
@@ -43,10 +42,10 @@ that a document of this kind exposes:
 | Net rentable area                   | Summary table                                                                                                   | No        |
 | Lease structure type (NNN or gross) | Summary table                                                                                                   | No        |
 
-I built the first three fields and stopped. This is the main scoping decision in the project.
+I built the first three fields (to showcase the PDF extraction workflow). This is the main scoping decision in the project.
 
 The three fields I built sit in the lease's summary table, where the label and its value are on the same line.
-That makes them straightforward to find with a text pattern. The rest are harder:
+That makes them straightforward to find with a text pattern. Extracting rest would add more work:
 
 - The renewal notice deadline is spelled out in words, "one hundred and eighty (180) days," in the middle of a
   sentence. The same sentence also mentions a 36-month renewal term, so you have to work out which number is the
@@ -55,8 +54,7 @@ That makes them straightforward to find with a text pattern. The rest are harder
   together.
 - The pro-rata share appears only in a sentence, not in the table.
 
-Each of those is its own project, not one more text pattern. In two days I could have nine fields that
-half-work, or three that work.
+Each of those is its own project, not one more text pattern. Therefore, I focused mostly on 3 rows. Once I finalized the fields, I could also create a couple of other sample files to test few variances.
 
 The renewal notice deadline is the most significant omission, because it maps directly to the costly failure
 described earlier. It's first in [What to build next](#what-to-build-next).
@@ -76,7 +74,7 @@ described earlier. It's first in [What to build next](#what-to-build-next).
   and asserts that the record survives the round trip.
 
 Kafka runs in tests only. The application doesn't wire a producer, so the streaming leg demonstrates that the
-extracted record is publishable and that the contract holds. It isn't a shipped feature.
+extracted record is publishable and that the contract holds.
 
 ## Run the service
 
@@ -132,8 +130,8 @@ To run a single test class:
 ### Run the Kafka streaming simulation
 
 `LeaseStreamingSimulationTest` simulates the downstream half of the pipeline. It starts a lightweight Kafka
-broker in KRaft mode in memory on an ephemeral port, serializes a `LeaseData` record to JSON, publishes it to
-the `cre-lease-events` topic, consumes it from a listener, deserializes it, and asserts that no data changed in
+broker in KRaft mode in memory on an ephemeral port (dynamic), serializes a `LeaseData` record to JSON, publishes it to
+the `cre-lease-events` topic, consumes it from a listener, deserializes it, and asserts the data to make sure no fields changed during 
 transit. The test repeats 10 times to confirm that the broker and the consumer establish their partition
 assignment reliably.
 
@@ -161,19 +159,15 @@ queue, an object store, or a document management system, so this project doesn't
 keeps the demonstration self-contained, but it isn't how the service would receive files in production.
 
 **A separate reader, parser, and transport.** The three concerns are independent, so you can replace the parser
-without touching the HTTP or Kafka boundary. I expect the parsing engine to be the component that changes, so
-that's where I put the seam.
+without touching the HTTP or Kafka boundary. I expect the parsing engine to change, so that's where I put the architectural boundary.
 
 ## Known limitations
 
 - The parser matches the literal labels `Landlord / Lessor` and `Tenant / Lessee`. A lease that uses different
   wording extracts nothing, and unmatched fields return `null` instead of raising an error.
-- The parser locates the expiration date positionally. It takes the second `Month D, YYYY` string in the
-  document and assumes the first is the commencement date. This holds for all three samples, and it's the most
-  fragile behavior in the codebase. Matching on the `Lease Term Expiration` label would be more reliable.
 - The parser reads the PDF text layer only. A scanned or image-based lease returns no fields and requires OCR.
 - A missing or unreadable file returns HTTP 500 rather than HTTP 404.
-- The service doesn't persist anything. It returns each parsed record and discards it.
+- The service doesn't persist anything. It returns each parsed record and discards it for local usage.
 
 ## What to build next
 
@@ -181,14 +175,12 @@ that's where I put the seam.
    from the expiration date, and return the resulting date with the number of days remaining. This change turns
    the service from a field extractor into a tool that prevents a lost option, and it's the shortest path to
    user value.
-2. **Match the expiration date on its label** instead of its ordinal position, which removes the most fragile
-   behavior in the parser.
-3. **Add a language-model parser behind the existing parser boundary**, then run it against the deterministic
+2**Add a language-model parser behind the existing parser boundary**, then run it against the deterministic
    parser on the same documents to compare accuracy and cost. Fields that appear only in prose, such as the
    pro-rata share and the notice clause, are where a model should win clearly.
-4. **Add real ingestion and an external broker.** Accept uploads or watch an object store, and move the Kafka
+3**Add real ingestion and an external broker.** Accept uploads or watch an object store, and move the Kafka
    producer out of the tests and into the application behind configuration.
-5. **Add persistence and containerization.** Store abstracted leases so that you can query a portfolio by
+4**Add persistence and containerization.** Store abstracted leases so that you can query a portfolio by
    expiration window, and package the service as a multi-stage image that connects to an external broker.
 
 ## Use of AI
@@ -211,15 +203,15 @@ The Kafka configuration took several rounds. The agent repeatedly reached for `J
 
 1. **Bypassing Deprecated Wrappers:** When the agent kept using deprecated Spring Kafka 4.x JSON wrappers, I forced it to use raw strings:
    
-   > *"Please use newer for ObjectMapper. Change the Kafka configuration to use standard Apache Kafka StringSerializer and StringDeserializer, and let's handle the JSON mapping manually with ObjectMapper to avoid the deprecated wrappers."*
+   > *"Please use newer API for ObjectMapper. Change the Kafka configuration to use standard Apache Kafka StringSerializer and StringDeserializer, and let's handle the JSON mapping manually with ObjectMapper to avoid the deprecated wrappers."*
 
 2. **Resolving Constructor Mismatches:** When the agent hallucinated constructors like `JacksonJsonSerializer(objectMapper)` that failed to compile, I stripped the boilerplate entirely:
    
-   > *"The serializer classes don't have those constructor signatures or fluent methods in this version. Let's completely bypass Spring's wrapper config blocks—just serialize the object to a raw string in the test, send it via KafkaTemplate<String, String>, and have the listener receive a raw string."*
+   > *"The serializer classes don't have those constructor signatures in this version, bypass Spring's wrapper config blocks and serialize the object to a raw string in the test, and let the listener receive a raw string."*
 
 3. **Mitigating KRaft Environment Collisions:** When the in-memory KRaft cluster crashed on startup because port 9092 was blocked or colliding, I directed it to use dynamic ports:
    
-   > *"Remove the hardcoded brokerProperties and listeners from @EmbeddedKafka. Use the dynamic ${spring.embedded.kafka.brokers} property in the Spring Boot test properties instead so the producer and consumer factories bind to a random open port."
+   > *"Remove the hardcoded brokerProperties and use dynamic property (including port) in the Spring Boot test properties, so the producer and consumer factories bind to a random open port."
 
 ### Using the agent to check my own work
 
@@ -231,17 +223,14 @@ It came back with:
 ```
 
 PDFBox reports the padding that aligns the summary-table columns, and `.trim()` only strips the ends. My unit
-test asserted the single-spaced value and passed, because its fixture was a hand-typed string rather than real
-extractor output. The test was checking my regular expressions against my own assumption about the text, not
-against the PDF.
+test asserted the single-spaced value and passed, because I had typed the expected result text rather than extract it from the PDF.
+The test was checking my regular expressions against my own assumption about the text, not against the PDF.
 
 I changed the parser to collapse internal whitespace and added `RealLeasePdfParsingTest`, which reads the actual
 PDFs through `PDFDocumentReader` so the tests cover what the service returns. The suite went from 13 tests to 16.
 
-
 The Kafka episode was me correcting the agent. This was the reverse, and it's the one I'd point to: a passing
-test was hiding a defect in the output contract, and running the service surfaced in a minute what reading it
-hadn't.
+test was hiding a potential defect that could arise if the PDFDocumentReader was changed by other developers and produced a different output.
 
 ### Correcting the tone
 
@@ -280,3 +269,13 @@ Reviewing the prose for overclaiming needed the same attention as reviewing the 
 
 Small, frequent commits, and I asked for the reasoning behind changes instead of accepting diffs. That habit is
 also what kept the scope from expanding quietly.
+
+# Result
+The biggest learning from this project was not necessarily the technological part, but working with multiple agents
+simultaneously. Each agent had a different perspective on the codebase and I needed to integrate them into one 
+consistent view of the project. Also, if you can see the Representative edits (kept what Claude changed) section, 
+you may notice slightly how Claude undermines the scope of the project a little bit. 
+It was more apparant while working with the agent itself. While trying to correct the document, I felt it cornered itself 
+to become more restrictive and undermined what the project represented. The problem was not the edit itself, but the persona it kept after that. It would keep same persona throughout while moving on from document edit to reviewing and editing code as well. I kept the scope of the project where it is because of this aspect as well. I could have very well added few more components to the project (e.g. UI, persistence etc.). However, working and tuning the agent to where I want them to work as fellow Engineers would be the most important part. Once gaining that confidence by nudging it everywhere possible during the early phases of the prject would have greater gains when I start adding more features to the project.
+
+Given the scope, I am very satisfied with the end result and the learnings I had about the domain and working with AI agents.

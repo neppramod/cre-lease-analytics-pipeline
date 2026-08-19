@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
+// This class is used to generate the two sample pdfs (sample2.pdf and sample3.pdf)
+// sample1.pdf is a more representative PDF created using AI agent
 public class TestPDFGeneratorUtility {
     private static final String baseDir = "src/main/resources/sampledocumentsfolder/";
 

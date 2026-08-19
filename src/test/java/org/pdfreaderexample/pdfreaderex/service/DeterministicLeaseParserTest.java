@@ -32,7 +32,7 @@ public class DeterministicLeaseParserTest {
         // Act
         LeaseData result = parser.extractFields(documentList);
 
-        // Assert: Group assertions for production verification clarity
+        // Assert: Group assertions
         assertAll("Lease Parameters Extraction Validation",
                 () -> assertNotNull(result, "Parsed payload should not be null"),
                 () -> assertEquals("Apex Commercial Holdings LLC", result.getLandlord(), "Failed to extract Landlord"),
